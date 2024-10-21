@@ -1,0 +1,6 @@
+powerups:
+- invincibility (timed)
+- extra life
+- mai ceva
+
+map editor
