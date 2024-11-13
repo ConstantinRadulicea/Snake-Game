@@ -13,7 +13,7 @@ const int CELL_SIZE = 20;
 
 enum Direction { UP, DOWN, LEFT, RIGHT };
 
-enum GameStates { MENU, PLAYING, OPTIONS, EXIT };
+enum GameStates { MENU, PLAYING, OPTIONS, EXIT, GAME_OVER };
 
 struct SnakePoint{
     int x, y;
@@ -100,11 +100,10 @@ void SnakeGame::changeDirection(int key) {
 }
 
 void SnakeGame::render(Mat &frame) {
-    frame = Scalar(0, 0, 0); // Refresh the frame
+    frame = Scalar(0, 0, 0);
 
     if (gameOver) {
         putText(frame, "Game Over", Point(WIDTH / 3, HEIGHT / 2), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 255), 2);
-        waitKey(0);
         return;
     }
 
@@ -125,8 +124,13 @@ void SnakeGame::resetGame() {
     placeApple();
 }
 
+
+
 void showMenu(Mat& frame, int& selectedOption);
-void handleMenuInput(int key, int &selectedOption, GameStates &currentState);
+void handleMenuInput(int key, int &selectedOption, GameStates &currentState, SnakeGame& game);
+
+void showGameOverMenu(Mat& frame, int& selectedOption);
+void handleGameOverMenu(int key, int& selectedOption, GameStates& currentState, SnakeGame& game);
 
 
 
@@ -138,6 +142,8 @@ int main() {
     GameStates currentState = MENU;
     int selectedOption = 0;
     
+    int64_t gameOverTimeStamp = 0;
+
     while (currentState != EXIT) 
     {
         int key = waitKey(100);
@@ -146,7 +152,7 @@ int main() {
         {
         case MENU:
             showMenu(frame, selectedOption);
-            handleMenuInput(key, selectedOption, currentState);
+            handleMenuInput(key, selectedOption, currentState, game);
             break;
 
         case PLAYING:
@@ -154,14 +160,10 @@ int main() {
             game.update();
             game.render(frame);
 
-            /*if (game.isGameOver()) {
-                putText(frame, )
-                currentState = MENU;
-            }*/
-
-            if (key == 'r') {
-                game.resetGame();
-                currentState = PLAYING;
+            if (game.isGameOver()) {
+                currentState = GAME_OVER;
+                gameOverTimeStamp = getTickCount();
+                selectedOption = 0;
             }
             break;
 
@@ -171,12 +173,19 @@ int main() {
         case EXIT:
             break;
         
+        case GAME_OVER:
+            game.render(frame);
+            if ((getTickCount() - gameOverTimeStamp) / getTickFrequency() >= 3) {
+                showGameOverMenu(frame, selectedOption);
+                handleGameOverMenu(key, selectedOption, currentState, game);
+            }
+            break;
+        
         }
 
         imshow("Snake Game", frame);
     }
 
-    waitKey(0);
     return 0;
 }
 
@@ -184,16 +193,15 @@ int main() {
 
 void showMenu(Mat &frame, int &selectedOption) {
     vector<string> menuOptions = { "Start the Game", "Options", "Exit" };
-
     frame = Scalar(0, 0, 0);
 
-    for (int i = 0; i < menuOptions.size(); i++) {
+    for (size_t i = 0; i < menuOptions.size(); i++) {
         Scalar color = (i == selectedOption) ? Scalar(0, 255, 0) : Scalar(255, 255, 255);
         putText(frame, menuOptions[i], Point(WIDTH / 3, 100 + i * 40), FONT_HERSHEY_SIMPLEX, 1, color, 2);
     }
 }
 
-void handleMenuInput(int key, int& selectedOption, GameStates& currentState) {
+void handleMenuInput(int key, int& selectedOption, GameStates& currentState, SnakeGame& game) {
     if (key == 'w' && selectedOption > 0) {
         selectedOption--;
     }
@@ -201,12 +209,46 @@ void handleMenuInput(int key, int& selectedOption, GameStates& currentState) {
         selectedOption++;
     }
 
-    if (key == '\r') {
+    if (key == 13) { // ASCI code for enter button
         switch (selectedOption) {
-        case 0: currentState = PLAYING; break;
+        case 0: 
+            currentState = PLAYING; 
+            game.resetGame();
+            break;
         case 1: currentState = OPTIONS; break;
         case 2: currentState = EXIT; break;
         }
     }
 }
+
+void showGameOverMenu(Mat& frame, int& selectedOption) {
+    vector<string> gameOverMenuOptions = { "Retry", "Back to Menu" };
+    frame = Scalar(0, 0, 0);
+
+    for (size_t i = 0; i < gameOverMenuOptions.size(); i++) {
+        Scalar color = (i == selectedOption) ? Scalar(0, 255, 0) : Scalar(255, 255, 255);
+        putText(frame, gameOverMenuOptions[i], Point(WIDTH / 3, HEIGHT / 2 + i * 40), FONT_HERSHEY_SIMPLEX, 1, color, 2);
+    }
+
+}
+
+void handleGameOverMenu(int key, int& selectedOption, GameStates& currentState, SnakeGame& game) {
+
+    if (key == 'w' && selectedOption > 0) selectedOption--;
+    if (key == 's' && selectedOption < 1) selectedOption ++;
+
+    if (key == 13) { // ASCI code for enter button
+        switch (selectedOption) {
+        case 0:
+            game.resetGame();
+            currentState = PLAYING;
+            break;
+        case 1:
+            currentState = MENU;
+            break;
+        }
+    }
+
+}
+
 
