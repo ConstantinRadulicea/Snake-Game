@@ -15,6 +15,9 @@ const string HIGH_SCORE_FILE = "highscore.txt";
 int windowWidth = WIDTH;
 int windowHeight = HEIGHT;
 
+// Globals to track the window size
+int g_window_width = 0, g_window_height = 0;
+
 enum Direction { UP, DOWN, LEFT, RIGHT };
 
 enum GameStates { MENU, PLAYING, OPTIONS, EXIT, GAME_OVER };
@@ -39,6 +42,7 @@ private:
     bool isPaused;
 
     void placeApple() {
+        srand(time(0));
         if (windowWidth > 0 && windowHeight > 0) {
             apple.x = (rand() % (windowWidth / CELL_SIZE)) * CELL_SIZE;
             apple.y = (rand() % (windowHeight / CELL_SIZE)) * CELL_SIZE;
@@ -49,21 +53,36 @@ private:
     }
 
     void placeSpecialApple() {
-        if (specialApple.x == -1 && specialApple.y == -1) {
-            if (rand() % 5 == 0) {
-                specialApple.x = (rand() % (windowWidth / CELL_SIZE)) * CELL_SIZE;
-                specialApple.y = (rand() % (windowHeight / CELL_SIZE)) * CELL_SIZE;
-            }
+        if (rand() % 100 >= 50) { // 50% to respawn
+            specialApple.x = -1; 
+            specialApple.y = -1;
+            return;
         }
+
+        int x, y;
+        do {
+            x = (rand() % (windowWidth / CELL_SIZE)) * CELL_SIZE;
+            y = (rand() % (windowHeight / CELL_SIZE)) * CELL_SIZE;
+        } while (isAppleOnSnake(x, y) || (x == apple.x && y == apple.y) || (x == pinkApple.x && y == pinkApple.y));
+        specialApple.x = x;
+        specialApple.y = y;
     }
 
     void placePinkApple() {
-        if (pinkApple.x == -1 && pinkApple.y == -1) {
-            if (rand() % 5 == 0) {
-                pinkApple.x = (rand() % (windowWidth / CELL_SIZE)) * CELL_SIZE;
-                pinkApple.y = (rand() % (windowHeight / CELL_SIZE)) * CELL_SIZE;
-            }
+        if (rand() % 100 >= 20) { // 20% to respawn
+            pinkApple.x = -1; 
+            pinkApple.y = -1;
+            return;
         }
+
+        int x, y;
+        do {
+            x = (rand() % (windowWidth / CELL_SIZE)) * CELL_SIZE;
+            y = (rand() % (windowHeight / CELL_SIZE)) * CELL_SIZE;
+        } while (isAppleOnSnake(x, y) || (x == apple.x && y == apple.y) || (x == specialApple.x && y == specialApple.y));
+
+        pinkApple.x = x;
+        pinkApple.y = y;
     }
 
     bool isCollision(SnakePoint pt) {
@@ -92,6 +111,7 @@ public:
 
     bool isGamePaused() const { return isPaused; }
     void togglePause() { isPaused = !isPaused; }
+    bool isAppleOnSnake(int x, int y);
 
 };
 
@@ -100,7 +120,8 @@ SnakeGame::SnakeGame() : dir(RIGHT), gameOver(false), gameScore(0), highScore(0)
     snake.push_back(SnakePoint(windowWidth / 2, windowHeight / 2));
     srand((unsigned)time(0));
     placeApple();
-    placeSpecialApple();
+    specialApple = SnakePoint(-1, -1);
+    pinkApple = SnakePoint(-1, -1);
     loadHighScore();
 }
 
@@ -109,12 +130,13 @@ SnakeGame::~SnakeGame() {}
 void SnakeGame::update() {
     if (gameOver) return;
 
+    // The next head position (direction) based on the pressed key
     SnakePoint head = snake.front();
     switch (dir) {
-    case UP: head.y -= CELL_SIZE; break;
-    case DOWN: head.y += CELL_SIZE; break;
-    case LEFT: head.x -= CELL_SIZE; break;
-    case RIGHT: head.x += CELL_SIZE; break;
+        case UP: head.y -= CELL_SIZE; break;
+        case DOWN: head.y += CELL_SIZE; break;
+        case LEFT: head.x -= CELL_SIZE; break;
+        case RIGHT: head.x += CELL_SIZE; break;
     }
 
     if (isCollision(head)) {
@@ -125,22 +147,29 @@ void SnakeGame::update() {
     snake.push_front(head);
 
     if (head.x == apple.x && head.y == apple.y) {
-        placeApple();
+        placeApple();  
         gameScore++;
-        placeSpecialApple();
-        placePinkApple();
-    } else if (head.x == specialApple.x && head.y == specialApple.y) {
+
+        if (specialApple.x == -1 && specialApple.y == -1) {
+            placeSpecialApple();
+        }
+        if (pinkApple.x == -1 && pinkApple.y == -1) {
+            placePinkApple();
+        }
+    } 
+    else if (head.x == specialApple.x && head.y == specialApple.y) {
         gameScore += 2;
-        specialApple.x = -1; 
-        specialApple.y = -1;
-    } else if (head.x == pinkApple.x && head.y == pinkApple.y) {
+        placeSpecialApple();
+    } 
+    else if (head.x == pinkApple.x && head.y == pinkApple.y) {
         numHearts++;
         gameScore++;
-        pinkApple.x = -1;
-        pinkApple.y = -1;
-    } else {
-        snake.pop_back();
+        placePinkApple();
+    } 
+    else {
+        snake.pop_back();  
     }
+
 
     if (gameScore > highScore) {
         highScore = gameScore;
@@ -226,7 +255,7 @@ void SnakeGame::saveHighScore() {
         file.close();
     }
     else {
-        cout << "\nNu s-a putu deschide fisierulul pentru SALVARE!" << endl;
+        cout << "\nNu s-a putut deschide fisierulul pentru SALVARE!" << endl;
     }
 }
 
@@ -245,6 +274,15 @@ void SnakeGame::drawHeart(Mat& frame, Point position) {
     polylines(frame, heart, true, Scalar(255, 105, 180), 2);
 }
 
+bool SnakeGame::isAppleOnSnake(int x, int y) {
+    for (auto segment : snake) {
+        if (segment.x == x && segment.y == y) {
+            return true;
+        }
+    }
+    return false;
+}
+
 
 
 void showMenu(Mat& frame, int& selectedOption);
@@ -256,12 +294,14 @@ void handleGameOverMenuInput(int key, int& selectedOption, GameStates& currentSt
 void showOptionsMenu(Mat& frame, int& selectedOption, int snakeSpeed, bool soundEnable, int& windowWidth, int& windowHeight);
 void handleOptionsMenuInput(int key, int& selectedOption, GameStates& currentState, int& snakeSpeed, bool& soundEnable, int& windowWidth, int& windowHeight, SnakeGame& game, Mat& frame);
 
+//void checkWindowSize(const std::string& windowName);
+
 
 
 int main() {
     SnakeGame game;
     Mat frame(windowHeight, windowWidth, CV_8UC3);
-    namedWindow("Snake Game", WINDOW_AUTOSIZE);
+    namedWindow("Snake Game", WINDOW_NORMAL);
 
     GameStates currentState = MENU;
     int selectedOption = 0;
@@ -395,8 +435,8 @@ void showOptionsMenu(Mat& frame, int& selectedOption, int snakeSpeed, bool sound
     vector<string> optionsMenu = { 
         "1. Snake Speed:", 
         "2. Sound:", 
-        "3. Window Size",
-        "4. Full-screen Size",
+        "3. Window Size: 800 x 600",
+        "4. Full-screen: 1400 x 760",
         "5. Back"
     };
     frame = Scalar(0, 0, 0);
@@ -480,7 +520,7 @@ void handleOptionsMenuInput(int key, int& selectedOption, GameStates& currentSta
         case 3:
             windowWidth = 1400;
             windowHeight = 760;
-            resizeWindow("Snake Game", windowWidth, windowHeight);
+            setWindowProperty("Snake Game", WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN);
             frame = Mat(windowHeight, windowWidth, CV_8UC3);
             game.resetGame();
             break;
@@ -494,4 +534,18 @@ void handleOptionsMenuInput(int key, int& selectedOption, GameStates& currentSta
 
 }
 
+// Callback function to handle window size
+//void checkWindowSize(const std::string& windowName) {
+//    cv::Rect rect = cv::getWindowImageRect(windowName); // Get window dimensions
+//    if (rect.width != g_window_width || rect.height != g_window_height) {
+//        g_window_height = rect.height;
+//        g_window_height = g_window_height >> 2;
+//        g_window_height = g_window_height << 2;
+//        g_window_height = g_window_height - (g_window_height % CELL_SIZE);
+//        //g_window_width = rect.width;
+//        g_window_width = (int)((float)g_window_height * 1.5f);
+//        g_window_width = g_window_width - (g_window_width % CELL_SIZE);
+//        std::cout << "Window resized to: " << g_window_width << "x" << g_window_height << std::endl;
+//    }
+//}
 
