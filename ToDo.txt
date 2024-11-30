@@ -1,9 +1,9 @@
 powerups:
 - extra life  x
 - mai ceva  x
-- invincibility (timed)  TODO (if 10 hearts 30 sec invincibility with higher speed + different color?)
+- invincibility (timed) (if 10 hearts 30 sec invincibility with higher speed + different color?) x
 
-- shoping cart/inventar pentru highscore(vieti, culori diferite, etc) TODO !!!
+- shoping cart/inventar pentru highscore(vieti, culori diferite, etc) x
 - map editor => mape cu obstacole TODO !!!
-- solve the resolution options TODO
+- solve the resolution options x
 - add sound TODO
