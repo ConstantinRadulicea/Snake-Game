@@ -6,6 +6,7 @@
 #include <fstream>
 #include "Snake.h"
 #include "Menu.h"
+#include "Glob.h"
 
 
 // Globals to track the window size
@@ -14,8 +15,11 @@
 int buttonPressed;
 
 
+
 int main() {
     SnakeGame game;
+    windowWidth = game.getWindowWidth();
+    windowHeight = game.getWindowHeigth();
     cv::Mat frame(windowHeight, windowWidth, CV_8UC3);
     cv::namedWindow("Snake Game", cv::WINDOW_NORMAL);
 

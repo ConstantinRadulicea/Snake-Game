@@ -4,17 +4,10 @@
 #include <deque>
 #include <string>
 #include <fstream>
+#include "Glob.h"
 
-
-
-const int MAP_WIDTH = 30;
-const int MAP_HEIGHT = 20;
-const int CELL_SIZE = 20;
-const int WIDTH = MAP_WIDTH * CELL_SIZE;
-const int HEIGHT = MAP_HEIGHT * CELL_SIZE;
 const std::string HIGH_SCORE_FILE = "highscore.txt";
-extern int windowWidth;
-extern int windowHeight;
+
 #define MAX_HARTS 3
 #define SUPERPOWER_HARTS_PRICE 1
 
@@ -46,6 +39,7 @@ private:
     const int SUPERPOWER_DURATION = 20;
     int normalSpeed;
 
+
     void placeApple();
     void placeSpecialApple();
     void placePinkApple();
@@ -53,6 +47,10 @@ private:
 
 
 public:
+    int MAP_WIDTH = 30;
+    int MAP_HEIGHT = 20;
+    int CELL_SIZE = 20;
+
     SnakeGame();
     ~SnakeGame();
     void update(int& snakeSpeed);
@@ -71,4 +69,7 @@ public:
     bool isAppleOnSnake(int x, int y);
     void buyLife();
     void buySuperPower(int& snakeSpeed);
+    int getWindowWidth();
+    int getWindowHeigth();
+    
 };

@@ -1,11 +1,15 @@
 #include "Snake.h"
 
-int windowWidth = WIDTH;
-int windowHeight = HEIGHT;
+int SnakeGame::getWindowWidth() {
+    return this->MAP_WIDTH * this->CELL_SIZE;
+}
+int SnakeGame::getWindowHeigth() {
+    return this->MAP_HEIGHT * this->CELL_SIZE;
+}
 
 SnakeGame::SnakeGame() : dir(RIGHT), gameOver(false), gameScore(0), highScore(0), isPaused(false), numHearts(1), normalSpeed(100)
 {
-    snake.push_back(SnakePoint(windowWidth / 2, windowHeight / 2));
+    snake.push_back(SnakePoint(MAP_WIDTH / 2, MAP_HEIGHT / 2));
     srand((unsigned)time(0));
     placeApple();
     specialApple = SnakePoint(-1, -1);
@@ -161,7 +165,7 @@ void SnakeGame::render(cv::Mat& frame) {
 
 void SnakeGame::resetGame() {
     snake.clear();
-    snake.push_back(SnakePoint(windowWidth / 2, windowHeight / 2));
+    snake.push_back(SnakePoint(MAP_WIDTH / 2, MAP_HEIGHT / 2));
     gameOver = false;
     gameScore = 0;
     dir = RIGHT;
@@ -249,7 +253,7 @@ void SnakeGame::buySuperPower(int& snakeSpeed) {
 
 void SnakeGame::placeApple() {
     srand(time(0));
-    if (windowWidth > 0 && windowHeight > 0) {
+    if (MAP_WIDTH > 0 && MAP_HEIGHT > 0) {
         apple.x = (rand() % MAP_WIDTH);
         apple.y = (rand() % MAP_HEIGHT);
     }

@@ -35,7 +35,7 @@ void handleMenuInput(int key, int& selectedOption, GameStates& currentState, Sna
 void showGameOverMenu(cv::Mat& frame, int& selectedOption) {
     std::vector<std::string> gameOverMenuOptions = { "Retry", "Back to Menu" };
     frame = cv::Scalar(0, 0, 0);
-
+    
     for (size_t i = 0; i < gameOverMenuOptions.size(); i++) {
         cv::Scalar color = (i == selectedOption) ? cv::Scalar(0, 255, 0) : cv::Scalar(255, 255, 255);
         putText(frame, gameOverMenuOptions[i], cv::Point(windowWidth / 3, windowHeight / 2 + i * 40), cv::FONT_HERSHEY_SIMPLEX, 1, color, 2);
@@ -141,8 +141,8 @@ void handleOptionsMenuInput(int key, int& selectedOption, GameStates& currentSta
             break;
 
         case 2:
-            windowWidth = (windowWidth == WIDTH) ? 800 : WIDTH;
-            windowHeight = (windowHeight == HEIGHT) ? 600 : HEIGHT;
+            //windowWidth = (windowWidth == WIDTH) ? 800 : WIDTH;
+            //windowHeight = (windowHeight == HEIGHT) ? 600 : HEIGHT;
             cv::resizeWindow("Snake Game", windowWidth, windowHeight);
             frame = cv::Mat(windowHeight, windowWidth, CV_8UC3);
             game.resetGame();

@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include "Snake.h"
+#include "Glob.h"
 
 
 void showMenu(cv::Mat& frame, int& selectedOption);
