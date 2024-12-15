@@ -29,24 +29,24 @@ void SnakeGame::update(int& snakeSpeed) {
     // The next head position (direction) based on the pressed key
     SnakePoint head = snake.front();
     switch (dir) {
-    case UP: head.y -= CELL_SIZE; break;
-    case DOWN: head.y += CELL_SIZE; break;
-    case LEFT: head.x -= CELL_SIZE; break;
-    case RIGHT: head.x += CELL_SIZE; break;
+    case UP: head.y -= 1; break;
+    case DOWN: head.y += 1; break;
+    case LEFT: head.x -= 1; break;
+    case RIGHT: head.x += 1; break;
     }
 
     if (isInvincible) {
         if (head.x < 0) {
-            head.x = windowWidth - CELL_SIZE; // Teleport to the right
+            head.x = MAP_WIDTH - 1; // Teleport to the right
         }
-        else if (head.x >= windowWidth) {
+        else if (head.x >= MAP_WIDTH) {
             head.x = 0; // Teleport to the left
         }
 
         if (head.y < 0) {
-            head.y = windowHeight - CELL_SIZE; // Teleport to the bottom
+            head.y = MAP_HEIGHT - 1; // Teleport to the bottom
         }
-        else if (head.y >= windowHeight) {
+        else if (head.y >= MAP_HEIGHT) {
             head.y = 0; // Teleport to the top
         }
     }
@@ -102,6 +102,10 @@ void SnakeGame::changeDirection(int key) {
     }
 }
 
+void SnakeGame::drawCell(cv::Mat& frame, int x, int y, cv::Scalar color) {
+    rectangle(frame, cv::Rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE), color, cv::FILLED);
+}
+
 void SnakeGame::render(cv::Mat& frame) {
     frame = cv::Scalar(0, 0, 0);
     cv::Scalar snakeColor = isInvincible ? cv::Scalar(0, 255, 255) : cv::Scalar(0, 255, 0);
@@ -113,20 +117,24 @@ void SnakeGame::render(cv::Mat& frame) {
 
     // "Drawing" the snake body
     for (auto& segment : snake) {
-        rectangle(frame, cv::Rect(segment.x, segment.y, CELL_SIZE, CELL_SIZE), snakeColor, cv::FILLED);
+        this->drawCell(frame, segment.x, segment.y, snakeColor);
+        //rectangle(frame, cv::Rect(segment.x, segment.y, CELL_SIZE, CELL_SIZE), snakeColor, cv::FILLED);
     }
 
     // "Drawing" the red apple
-    rectangle(frame, cv::Rect(apple.x, apple.y, CELL_SIZE, CELL_SIZE), cv::Scalar(0, 0, 255), cv::FILLED);
+    this->drawCell(frame, apple.x, apple.y, cv::Scalar(0, 0, 255));
+    //rectangle(frame, cv::Rect(apple.x, apple.y, CELL_SIZE, CELL_SIZE), cv::Scalar(0, 0, 255), cv::FILLED);
 
     // "Drawing" the golden apple
     if (specialApple.x != -1 && specialApple.y != -1) {
-        rectangle(frame, cv::Rect(specialApple.x, specialApple.y, CELL_SIZE, CELL_SIZE), cv::Scalar(0, 255, 255), cv::FILLED);
+        this->drawCell(frame, specialApple.x, specialApple.y, cv::Scalar(0, 255, 255));
+        //rectangle(frame, cv::Rect(specialApple.x, specialApple.y, CELL_SIZE, CELL_SIZE), cv::Scalar(0, 255, 255), cv::FILLED);
     }
 
     // "Drawing" the pink apple
     if (pinkApple.x != -1 && pinkApple.y != -1) {
-        rectangle(frame, cv::Rect(pinkApple.x, pinkApple.y, CELL_SIZE, CELL_SIZE), cv::Scalar(255, 105, 180), cv::FILLED);
+        this->drawCell(frame, pinkApple.x, pinkApple.y, cv::Scalar(255, 105, 180));
+        //rectangle(frame, cv::Rect(pinkApple.x, pinkApple.y, CELL_SIZE, CELL_SIZE), cv::Scalar(255, 105, 180), cv::FILLED);
     }
 
     // Drawing hearts
@@ -242,12 +250,12 @@ void SnakeGame::buySuperPower(int& snakeSpeed) {
 void SnakeGame::placeApple() {
     srand(time(0));
     if (windowWidth > 0 && windowHeight > 0) {
-        apple.x = (rand() % (windowWidth / CELL_SIZE)) * CELL_SIZE;
-        apple.y = (rand() % (windowHeight / CELL_SIZE)) * CELL_SIZE;
+        apple.x = (rand() % MAP_WIDTH);
+        apple.y = (rand() % MAP_HEIGHT);
     }
     else {
-        apple.x = windowWidth / 2;
-        apple.y = windowHeight / 2;
+        apple.x = MAP_WIDTH / 2;
+        apple.y = MAP_HEIGHT / 2;
     }
 }
 
@@ -260,8 +268,8 @@ void SnakeGame::placeSpecialApple() {
 
     int x, y;
     do {
-        x = (rand() % (windowWidth / CELL_SIZE)) * CELL_SIZE;
-        y = (rand() % (windowHeight / CELL_SIZE)) * CELL_SIZE;
+        x = (rand() % MAP_WIDTH);
+        y = (rand() % MAP_HEIGHT);
     } while (isAppleOnSnake(x, y) || (x == apple.x && y == apple.y) || (x == pinkApple.x && y == pinkApple.y));
     specialApple.x = x;
     specialApple.y = y;
@@ -276,8 +284,8 @@ void SnakeGame::placePinkApple() {
 
     int x, y;
     do {
-        x = (rand() % (windowWidth / CELL_SIZE)) * CELL_SIZE;
-        y = (rand() % (windowHeight / CELL_SIZE)) * CELL_SIZE;
+        x = (rand() % MAP_WIDTH);
+        y = (rand() % MAP_HEIGHT);
     } while (isAppleOnSnake(x, y) || (x == apple.x && y == apple.y) || (x == specialApple.x && y == specialApple.y));
 
     pinkApple.x = x;
@@ -285,7 +293,7 @@ void SnakeGame::placePinkApple() {
 }
 
 bool SnakeGame::isCollision(SnakePoint pt) {
-    if (pt.x < 0 || pt.x >= windowWidth || pt.y < 0 || pt.y >= windowHeight)
+    if (pt.x < 0 || pt.x >= MAP_WIDTH || pt.y < 0 || pt.y >= MAP_HEIGHT)
         return true;
     for (auto& segment : snake) {
         if (segment.x == pt.x && segment.y == pt.y)

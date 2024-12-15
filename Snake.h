@@ -5,9 +5,13 @@
 #include <string>
 #include <fstream>
 
-const int WIDTH = 600;
-const int HEIGHT = 400;
+
+
+const int MAP_WIDTH = 30;
+const int MAP_HEIGHT = 20;
 const int CELL_SIZE = 20;
+const int WIDTH = MAP_WIDTH * CELL_SIZE;
+const int HEIGHT = MAP_HEIGHT * CELL_SIZE;
 const std::string HIGH_SCORE_FILE = "highscore.txt";
 extern int windowWidth;
 extern int windowHeight;
@@ -60,6 +64,7 @@ public:
     void saveHighScore();
     void loseHeart();
     void drawHeart(cv::Mat& frame, cv::Point position);
+    void drawCell(cv::Mat& frame, int x, int y, cv::Scalar color);
 
     bool isGamePaused() const { return isPaused; }
     void togglePause() { isPaused = !isPaused; }
