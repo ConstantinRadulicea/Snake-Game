@@ -56,7 +56,11 @@ int map_editor_routine() {
             break;
         }
     }
+    // Unset the mouse callback
+    cv::setMouseCallback("Snake Game Map Editor", nullptr);
 
+    // Close the window
+    cv::destroyWindow("Snake Game Map Editor");
     return 0;
 }
 
