@@ -84,6 +84,19 @@ public:
         }
     }
 
+    void draw(cv::Mat& frame, cv::Scalar color, int cellSize) {
+        for (int i = 0; i < this->map.rows; ++i) {
+            for (int j = 0; j < this->map.cols; ++j) {
+                if (this->map.at<uchar>(i, j) == 1) { // Obstacle
+                    cv::rectangle(frame,
+                        cv::Point(j * cellSize, i * cellSize),
+                        cv::Point((j + 1) * cellSize, (i + 1) * cellSize),
+                        color, cv::FILLED);
+                }
+            }
+        }
+    }
+
     // Getters
     int getRows() const { return map.rows; }
     int getCols() const { return map.cols; }

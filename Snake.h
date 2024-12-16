@@ -48,9 +48,9 @@ private:
 
 
 public:
-    int MAP_WIDTH = 30;
-    int MAP_HEIGHT = 20;
-    int CELL_SIZE = 20;
+    int mao_width = MAP_WIDTH;
+    int map_height = MAP_HEIGHT;
+    int cell_size = CELL_SIZE;
     Map map;
 
     SnakeGame();

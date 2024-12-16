@@ -1,13 +1,13 @@
 #include "Snake.h"
 
 int SnakeGame::getWindowWidth() {
-    return this->map.getCols() * this->CELL_SIZE;
+    return this->map.getCols() * this->cell_size;
 }
 int SnakeGame::getWindowHeigth() {
-    return this->map.getRows() * this->CELL_SIZE;
+    return this->map.getRows() * this->cell_size;
 }
 
-SnakeGame::SnakeGame() : dir(RIGHT), gameOver(false), gameScore(0), highScore(0), isPaused(false), numHearts(1), normalSpeed(100), map(this->MAP_HEIGHT, this->MAP_WIDTH, std::string("map.txt"))
+SnakeGame::SnakeGame() : dir(RIGHT), gameOver(false), gameScore(0), highScore(0), isPaused(false), numHearts(1), normalSpeed(100), map(this->map_height, this->mao_width, std::string("map.txt"))
 {
     map.load();
     snake.push_back(SnakePoint(this->map.getCols() / 2,  this->map.getRows() / 2));
@@ -115,6 +115,7 @@ void SnakeGame::render(cv::Mat& frame) {
     frame = cv::Scalar(0, 0, 0);
     cv::Scalar snakeColor = isInvincible ? cv::Scalar(0, 255, 255) : cv::Scalar(0, 255, 0);
 
+    this->map.draw(frame, cv::Scalar(50, 75, 0), this->cell_size);
     if (gameOver) {
         putText(frame, "Game Over", cv::Point(windowWidth / 3, windowHeight / 2), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255), 2);
         return;
@@ -172,7 +173,7 @@ void SnakeGame::resetGame() {
     dir = RIGHT;
     numHearts = MAX_HARTS;
     isInvincible = false;
-
+    this->map.load();
     placeApple();
 }
 
@@ -254,14 +255,13 @@ void SnakeGame::buySuperPower(int& snakeSpeed) {
 
 void SnakeGame::placeApple() {
     srand(time(0));
-    if (this->map.getCols() > 0 &&  this->map.getRows() > 0) {
-        apple.x = (rand() % this->map.getCols());
-        apple.y = (rand() %  this->map.getRows());
-    }
-    else {
-        apple.x = this->map.getCols() / 2;
-        apple.y =  this->map.getRows() / 2;
-    }
+    int x, y;
+    do {
+        x = (rand() % this->map.getCols());
+        y = (rand() % this->map.getRows());
+    } while (this->isCollision(SnakePoint{ x, y }) || (x == apple.x && y == apple.y) || (x == pinkApple.x && y == pinkApple.y));
+    apple.x = x;
+    apple.y = y;
 }
 
 void SnakeGame::placeSpecialApple() {
@@ -275,7 +275,7 @@ void SnakeGame::placeSpecialApple() {
     do {
         x = (rand() % this->map.getCols());
         y = (rand() %  this->map.getRows());
-    } while (isAppleOnSnake(x, y) || (x == apple.x && y == apple.y) || (x == pinkApple.x && y == pinkApple.y));
+    } while (this->isCollision(SnakePoint{ x, y }) || (x == apple.x && y == apple.y) || (x == pinkApple.x && y == pinkApple.y));
     specialApple.x = x;
     specialApple.y = y;
 }
@@ -291,7 +291,7 @@ void SnakeGame::placePinkApple() {
     do {
         x = (rand() % this->map.getCols());
         y = (rand() %  this->map.getRows());
-    } while (isAppleOnSnake(x, y) || (x == apple.x && y == apple.y) || (x == specialApple.x && y == specialApple.y));
+    } while (this->isCollision(SnakePoint{ x, y }) || (x == apple.x && y == apple.y) || (x == specialApple.x && y == specialApple.y));
 
     pinkApple.x = x;
     pinkApple.y = y;
@@ -303,6 +303,9 @@ bool SnakeGame::isCollision(SnakePoint pt) {
     for (auto& segment : snake) {
         if (segment.x == pt.x && segment.y == pt.y)
             return true;
+    }
+    if (this->map.isObstacle(pt.x, pt.y)) {
+        return true;
     }
     return false;
 }
