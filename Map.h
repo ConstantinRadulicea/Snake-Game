@@ -15,6 +15,9 @@ public:
         map = cv::Mat(rows, cols, CV_8UC1, cv::Scalar(0)); // Initialize with free space (0)
     }
 
+
+
+
     // Load map from file
     bool load() {
         std::ifstream file(mapFile);

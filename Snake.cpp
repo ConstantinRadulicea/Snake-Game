@@ -1,15 +1,16 @@
 #include "Snake.h"
 
 int SnakeGame::getWindowWidth() {
-    return this->MAP_WIDTH * this->CELL_SIZE;
+    return this->map.getCols() * this->CELL_SIZE;
 }
 int SnakeGame::getWindowHeigth() {
-    return this->MAP_HEIGHT * this->CELL_SIZE;
+    return this->map.getRows() * this->CELL_SIZE;
 }
 
-SnakeGame::SnakeGame() : dir(RIGHT), gameOver(false), gameScore(0), highScore(0), isPaused(false), numHearts(1), normalSpeed(100)
+SnakeGame::SnakeGame() : dir(RIGHT), gameOver(false), gameScore(0), highScore(0), isPaused(false), numHearts(1), normalSpeed(100), map(this->MAP_HEIGHT, this->MAP_WIDTH, std::string("map.txt"))
 {
-    snake.push_back(SnakePoint(MAP_WIDTH / 2, MAP_HEIGHT / 2));
+    map.load();
+    snake.push_back(SnakePoint(this->map.getCols() / 2,  this->map.getRows() / 2));
     srand((unsigned)time(0));
     placeApple();
     specialApple = SnakePoint(-1, -1);
@@ -41,16 +42,16 @@ void SnakeGame::update(int& snakeSpeed) {
 
     if (isInvincible) {
         if (head.x < 0) {
-            head.x = MAP_WIDTH - 1; // Teleport to the right
+            head.x = this->map.getCols() - 1; // Teleport to the right
         }
-        else if (head.x >= MAP_WIDTH) {
+        else if (head.x >= this->map.getCols()) {
             head.x = 0; // Teleport to the left
         }
-
+       
         if (head.y < 0) {
-            head.y = MAP_HEIGHT - 1; // Teleport to the bottom
+            head.y =  this->map.getRows() - 1; // Teleport to the bottom
         }
-        else if (head.y >= MAP_HEIGHT) {
+        else if (head.y >=  this->map.getRows()) {
             head.y = 0; // Teleport to the top
         }
     }
@@ -165,7 +166,7 @@ void SnakeGame::render(cv::Mat& frame) {
 
 void SnakeGame::resetGame() {
     snake.clear();
-    snake.push_back(SnakePoint(MAP_WIDTH / 2, MAP_HEIGHT / 2));
+    snake.push_back(SnakePoint(this->map.getCols() / 2,  this->map.getRows() / 2));
     gameOver = false;
     gameScore = 0;
     dir = RIGHT;
@@ -253,13 +254,13 @@ void SnakeGame::buySuperPower(int& snakeSpeed) {
 
 void SnakeGame::placeApple() {
     srand(time(0));
-    if (MAP_WIDTH > 0 && MAP_HEIGHT > 0) {
-        apple.x = (rand() % MAP_WIDTH);
-        apple.y = (rand() % MAP_HEIGHT);
+    if (this->map.getCols() > 0 &&  this->map.getRows() > 0) {
+        apple.x = (rand() % this->map.getCols());
+        apple.y = (rand() %  this->map.getRows());
     }
     else {
-        apple.x = MAP_WIDTH / 2;
-        apple.y = MAP_HEIGHT / 2;
+        apple.x = this->map.getCols() / 2;
+        apple.y =  this->map.getRows() / 2;
     }
 }
 
@@ -272,8 +273,8 @@ void SnakeGame::placeSpecialApple() {
 
     int x, y;
     do {
-        x = (rand() % MAP_WIDTH);
-        y = (rand() % MAP_HEIGHT);
+        x = (rand() % this->map.getCols());
+        y = (rand() %  this->map.getRows());
     } while (isAppleOnSnake(x, y) || (x == apple.x && y == apple.y) || (x == pinkApple.x && y == pinkApple.y));
     specialApple.x = x;
     specialApple.y = y;
@@ -288,8 +289,8 @@ void SnakeGame::placePinkApple() {
 
     int x, y;
     do {
-        x = (rand() % MAP_WIDTH);
-        y = (rand() % MAP_HEIGHT);
+        x = (rand() % this->map.getCols());
+        y = (rand() %  this->map.getRows());
     } while (isAppleOnSnake(x, y) || (x == apple.x && y == apple.y) || (x == specialApple.x && y == specialApple.y));
 
     pinkApple.x = x;
@@ -297,7 +298,7 @@ void SnakeGame::placePinkApple() {
 }
 
 bool SnakeGame::isCollision(SnakePoint pt) {
-    if (pt.x < 0 || pt.x >= MAP_WIDTH || pt.y < 0 || pt.y >= MAP_HEIGHT)
+    if (pt.x < 0 || pt.x >= this->map.getCols() || pt.y < 0 || pt.y >=  this->map.getRows())
         return true;
     for (auto& segment : snake) {
         if (segment.x == pt.x && segment.y == pt.y)

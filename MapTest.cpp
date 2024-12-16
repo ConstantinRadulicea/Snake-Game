@@ -10,9 +10,9 @@ void mouseCallback(int event, int x, int y, int flags, void* userdata) {
     editor->handleMouse(event, x, y);
 }
 
-int main22() {
+int main222() {
     const int rows = 20;       // Map rows
-    const int cols = 20;       // Map columns
+    const int cols = 30;       // Map columns
     const std::string mapFile = "map.txt";
 
     // Initialize Map

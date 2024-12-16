@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include "Glob.h"
+#include "Map.h"
 
 const std::string HIGH_SCORE_FILE = "highscore.txt";
 
@@ -50,6 +51,7 @@ public:
     int MAP_WIDTH = 30;
     int MAP_HEIGHT = 20;
     int CELL_SIZE = 20;
+    Map map;
 
     SnakeGame();
     ~SnakeGame();

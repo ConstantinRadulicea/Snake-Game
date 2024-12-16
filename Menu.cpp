@@ -141,8 +141,8 @@ void handleOptionsMenuInput(int key, int& selectedOption, GameStates& currentSta
             break;
 
         case 2:
-            //windowWidth = (windowWidth == WIDTH) ? 800 : WIDTH;
-            //windowHeight = (windowHeight == HEIGHT) ? 600 : HEIGHT;
+            windowWidth = (windowWidth == WIDTH) ? 800 : WIDTH;
+            windowHeight = (windowHeight == HEIGHT) ? 600 : HEIGHT;
             cv::resizeWindow("Snake Game", windowWidth, windowHeight);
             frame = cv::Mat(windowHeight, windowWidth, CV_8UC3);
             game.resetGame();
